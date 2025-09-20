@@ -1,3 +1,5 @@
+
+
 // frontend/src/components/Interviewer.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -10,7 +12,7 @@ const Interviewer = () => {
   const fetchSessions = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/reports`);
-      setSessions(res.data.slice(-5)); // last 5 sessions
+      setSessions(res.data.slice(-2)); // only last 2 sessions
     } catch (err) {
       console.error(err);
     }
@@ -27,30 +29,24 @@ const Interviewer = () => {
         <thead>
           <tr>
             <th>Candidate</th>
-            <th>Start Time</th>
-            <th>End Time</th>
+            <th>Duration</th>
             <th>Focus Lost</th>
-            <th>Multiple Faces</th>
-            <th>Suspicious Items</th>
+            <th>Suspicious Events</th>
             <th>Integrity Score</th>
-            <th>Video</th>
           </tr>
         </thead>
         <tbody>
-          {sessions.map(s => (
+          {sessions.map((s) => (
             <tr key={s._id}>
-              <td>{s.candidateName}</td>
-              <td>{new Date(s.startedAt).toLocaleString()}</td>
-              <td>{s.endedAt ? new Date(s.endedAt).toLocaleString() : "Ongoing"}</td>
-              <td>{s.lostFocusCount || s.events?.filter(e => e.type.includes("Focus")).length || 0}</td>
-              <td>{s.multipleFaceCount || s.events?.filter(e => e.type.includes("Multiple Faces")).length || 0}</td>
-              <td>{s.suspiciousEvents?.length || s.events?.filter(e => e.type.includes("Suspicious")).length || 0}</td>
-              <td>{s.integrityScore !== undefined ? s.integrityScore : 100 - (s.events?.length || 0)}</td>
+              <td>{s.candidate}</td>
               <td>
-                {s.videoPath ? (
-                  <a href={`${API_URL}${s.videoPath}`} target="_blank" rel="noreferrer">View</a>
-                ) : "N/A"}
+                {s.startedAt && s.endedAt
+                  ? `${Math.round((new Date(s.endedAt) - new Date(s.startedAt)) / 1000)} sec`
+                  : "Ongoing"}
               </td>
+              <td>{s.events.filter((e) => e.type.includes("Focus")).length}</td>
+              <td>{s.events.filter((e) => e.type.includes("Suspicious") || e.type.includes("Drowsiness")).length}</td>
+              <td>{100 - (s.events.length || 0)}</td>
             </tr>
           ))}
         </tbody>
@@ -60,6 +56,8 @@ const Interviewer = () => {
 };
 
 export default Interviewer;
+
+
 
 
 
@@ -75,7 +73,7 @@ export default Interviewer;
 //   const fetchSessions = async () => {
 //     try {
 //       const res = await axios.get(`${API_URL}/api/reports`);
-//       setSessions(res.data.slice(-2)); // only last 2 sessions
+//       setSessions(res.data.slice(-5)); // last 5 sessions
 //     } catch (err) {
 //       console.error(err);
 //     }
@@ -94,14 +92,28 @@ export default Interviewer;
 //             <th>Candidate</th>
 //             <th>Start Time</th>
 //             <th>End Time</th>
+//             <th>Focus Lost</th>
+//             <th>Multiple Faces</th>
+//             <th>Suspicious Items</th>
+//             <th>Integrity Score</th>
+//             <th>Video</th>
 //           </tr>
 //         </thead>
 //         <tbody>
-//           {sessions.map((s) => (
+//           {sessions.map(s => (
 //             <tr key={s._id}>
-//               <td>{s.candidate}</td>
+//               <td>{s.candidateName}</td>
 //               <td>{new Date(s.startedAt).toLocaleString()}</td>
 //               <td>{s.endedAt ? new Date(s.endedAt).toLocaleString() : "Ongoing"}</td>
+//               <td>{s.lostFocusCount || s.events?.filter(e => e.type.includes("Focus")).length || 0}</td>
+//               <td>{s.multipleFaceCount || s.events?.filter(e => e.type.includes("Multiple Faces")).length || 0}</td>
+//               <td>{s.suspiciousEvents?.length || s.events?.filter(e => e.type.includes("Suspicious")).length || 0}</td>
+//               <td>{s.integrityScore !== undefined ? s.integrityScore : 100 - (s.events?.length || 0)}</td>
+//               <td>
+//                 {s.videoPath ? (
+//                   <a href={`${API_URL}${s.videoPath}`} target="_blank" rel="noreferrer">View</a>
+//                 ) : "N/A"}
+//               </td>
 //             </tr>
 //           ))}
 //         </tbody>
@@ -111,4 +123,3 @@ export default Interviewer;
 // };
 
 // export default Interviewer;
-
